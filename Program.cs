@@ -10,7 +10,7 @@ namespace Casino_Project
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
-            builder.Services.AddRazorPages();
+            builder.Services.AddRazorPages().AddRazorRuntimeCompilation();
             builder.Services.AddDbContext<AplicationDbContext>(options => options.UseSqlServer(
                     builder.Configuration.GetConnectionString("DefaultConnection")
                 ));
