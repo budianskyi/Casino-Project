@@ -1,0 +1,28 @@
+﻿@page
+@model Casino_Project.Pages.Users.DeleteModel
+
+<form method="post">
+	<input hidden asp-for="User.Id" />
+	<div class="border p-3 mt-4">
+		<div class="row pb-2">
+			<h2 class="text-primary pl-3">Delete User</h2>
+			<hr />
+		</div>
+		<div class="mb-3">
+			<label asp-for="User.UserName"></label>
+			<input asp-for="@Model.User.UserName" disabled class="form-control" />
+		</div>
+		<div class="mb-3">
+			<label asp-for="User.Balance"></label>
+			<input asp-for="@Model.User.Balance" disabled class="form-control" />
+		</div>
+		<button type="submit" class="btn-danger" style="width:150px">Delete</button>
+		<a asp-page="Index" class="btn btn-secondary" style="width:150px;">Back to List</a>
+	</div>
+</form>
+
+@section Scripts{
+	@{
+		<partial name="_ValidationScriptsPartial" />
+	}
+}
