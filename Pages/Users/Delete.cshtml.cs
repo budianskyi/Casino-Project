@@ -27,6 +27,8 @@ namespace Casino_Project.Pages.Users
             {
                 _db.User.Remove(userFromDb);
                 await _db.SaveChangesAsync();
+
+                TempData["success"] = "User deleted successfully";
                 return RedirectToPage("Index");
             }          
             

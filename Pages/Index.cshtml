@@ -4,7 +4,135 @@
     ViewData["Title"] = "Home page";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Casino Main Menu</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+
+        body {
+            background: linear-gradient(45deg, #141e30, #243b55);
+            color: #fff;
+            font-family: 'Arial', sans-serif;
+        }
+
+        .navbar {
+            background-color: #000;
+        }
+
+        .navbar-brand {
+            font-family: 'Monaco', monospace;
+            font-size: 1.5rem;
+            color: #f39c12 !important;
+        }
+
+        .nav-link {
+            color: #f1c40f !important;
+        }
+
+            .nav-link:hover {
+                color: #e67e22 !important;
+            }
+
+        .btn-primary {
+            background-color: #e74c3c;
+            border: none;
+        }
+
+            .btn-primary:hover {
+                background-color: #c0392b;
+            }
+
+        .btn-outline-light {
+            border-color: #f1c40f;
+            color: #f1c40f;
+        }
+
+            .btn-outline-light:hover {
+                background-color: #f1c40f;
+                color: #000;
+            }
+
+        .container h1 {
+            font-size: 3rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .container p {
+            font-size: 1.2rem;
+        }
+
+        .icon {
+            margin-right: 8px;
+        }
+
+        .game-card {
+            background-color: #2c3e50;
+            border-radius: 15px;
+            color: #fff;
+            padding: 20px;
+            transition: transform 0.3s;
+        }
+
+        .game-card:hover {
+            transform: scale(1.05);
+        }
+
+        .game-card i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+
+        .game-card h4 {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .game-card p {
+            font-size: 1.2rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container text-center mt-5">
+        <h1>Ласкаво просимо до Casino Royale!</h1>
+        <p>Відчуйте азарт, обирайте свої ігри та вигравайте великі призи.</p>
+
+        <div class="row mt-5">
+            <div class="col-md-4 mb-4">
+                <div class="game-card">
+                    <i class="fas fa-dice"></i>
+                    <h4>Гра в кості</h4>
+                    <p>Поставте на кістки і спробуйте свою удачу!</p>
+                    <a class="btn btn-warning btn-lg" asp-page="/Games/Dice Game/Index">Грати</a>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="game-card">
+                    <i class="fas fa-coins"></i>
+                    <h4>Слоти</h4>
+                    <p>Вибирайте слоти та вигравайте великі призи!</p>
+                    <button class="btn btn-warning btn-lg">Грати</button>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="game-card">
+                    <i class="fas fa-poker-chip"></i>
+                    <h4>Покер</h4>
+                    <p>Спільно з іншими гравцями грайте в покер!</p>
+                    <button class="btn btn-warning btn-lg">Грати</button>
+                </div>
+            </div>
+        </div>        
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
+</body>
+</html>

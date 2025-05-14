@@ -29,6 +29,9 @@ namespace Casino_Project.Pages.Users
             {
                 _db.User.Update(user);
                 await _db.SaveChangesAsync();
+
+                TempData["success"] = "User updated successfully";
+
                 return RedirectToPage("Index");
             }
             return Page();

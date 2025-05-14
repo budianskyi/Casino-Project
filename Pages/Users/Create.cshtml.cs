@@ -28,6 +28,8 @@ namespace Casino_Project.Pages.Users
             {
                 await _db.User.AddAsync(user);
                 await _db.SaveChangesAsync();
+
+                TempData["success"] = "User created successfully";
                 return RedirectToPage("Index");
             }
             return Page();
