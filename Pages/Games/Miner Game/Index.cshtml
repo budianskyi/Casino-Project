@@ -1,0 +1,183 @@
+﻿@page
+@model Casino_Project.Pages.Games.Miner.IndexModel
+@{
+    ViewData["Title"] = "Мінер 5x5";
+}
+
+<h1>Мінер 5x5</h1>
+<p>
+    💣 Кількість мін:
+    <select id="mine-count">
+        <option value="1">1</option>
+        <option value="3" selected>3</option>
+        <option value="5">5</option>
+        <option value="10">10</option>
+    </select>
+</p>
+
+<p>
+    💰 Ставка:
+    <input type="number" id="bet-input" value="10" min="1" style="width: 60px;">
+    <button onclick="startGame()">🎮 Почати гру</button>
+</p>
+
+<p>Монети: <span id="balance">@Model.User.Balance</span></p>
+<p>📈 Потенційний виграш: <span id="potential-win">0</span></p>
+
+<button onclick="collectPrize()">💎 Забрати приз</button>
+
+<div class="grid" id="grid"></div>
+<div id="game-over" class="hidden">💥 Поразка!</div>
+<div id="result-message" class="hidden"></div>
+
+@section Scripts {
+    <script>
+        const gridSize = 5;
+        let mineCount = 3;
+        let betAmount = 10;
+        let revealedSafeCells = 0;
+        let balance = parseInt(document.getElementById('balance').textContent);
+        let grid = [];
+        let gameStarted = false;
+
+        const gameOverEl = document.getElementById("game-over");
+        const collectButton = document.querySelector("button[onclick='collectPrize()']");
+        collectButton.disabled = true;
+
+        function updateBalanceLocally(amount) {
+            balance += amount;
+            document.getElementById('balance').textContent = balance;
+        }
+
+        function updatePotentialWin() {
+            const potentialWin = betAmount + (revealedSafeCells * 0.1 * betAmount);
+            document.getElementById('potential-win').textContent = potentialWin.toFixed(2);
+        }
+
+        function generateGrid() {
+            grid = Array.from({ length: gridSize * gridSize }, () => ({
+                mine: false,
+                revealed: false
+            }));
+            let minesPlaced = 0;
+            while (minesPlaced < mineCount) {
+                let i = Math.floor(Math.random() * grid.length);
+                if (!grid[i].mine) {
+                    grid[i].mine = true;
+                    minesPlaced++;
+                }
+            }
+        }
+
+        function renderGrid() {
+            const gridContainer = document.getElementById('grid');
+            gridContainer.innerHTML = '';
+            grid.forEach((cell, index) => {
+                const div = document.createElement('div');
+                div.classList.add('cell');
+                if (cell.revealed) {
+                    div.classList.add(cell.mine ? 'mine' : 'safe');
+                    div.textContent = cell.mine ? '💣' : '+';
+                }
+                div.addEventListener('click', () => revealCell(index));
+                gridContainer.appendChild(div);
+            });
+        }
+
+        function revealCell(index) {
+            if (!gameStarted || grid[index].revealed) return;
+
+            grid[index].revealed = true;
+            if (grid[index].mine) {
+                showGameOver();
+            } else {
+                revealedSafeCells++;
+                updatePotentialWin();
+                collectButton.disabled = false;
+            }
+            renderGrid();
+        }
+
+        function collectPrize() {
+            const potentialWin = betAmount + (revealedSafeCells * 0.1 * betAmount);
+            sendResultToServer(true, potentialWin);
+            showResultMessage(`Ви виграли ${potentialWin.toFixed(2)} монет!`);
+            resetGame();
+        }
+
+        function showGameOver() {
+            gameOverEl.classList.add('show');
+            gameOverEl.classList.remove('hidden');
+            sendResultToServer(false, 0);
+            showResultMessage("Ви програли 💥");
+            setTimeout(() => {
+                gameOverEl.classList.remove('show');
+                gameOverEl.classList.add('hidden');
+                resetGame();
+            }, 2000);
+        }
+
+        function showResultMessage(text) {
+            const msg = document.getElementById('result-message');
+            msg.textContent = text;
+            msg.classList.add('show');
+            msg.classList.remove('hidden');
+            setTimeout(() => {
+                msg.classList.remove('show');
+                msg.classList.add('hidden');
+            }, 2000);
+        }
+
+        function startGame() {
+            betAmount = parseFloat(document.getElementById("bet-input").value) || 10;
+            mineCount = parseInt(document.getElementById("mine-count").value) || 3;
+            if (balance < betAmount) {
+                alert("Недостатньо монет для ставки!");
+                return;
+            }
+            updateBalanceLocally(-betAmount);
+            gameStarted = true;
+        }
+
+        function resetGame() {
+            revealedSafeCells = 0;
+            betAmount = parseFloat(document.getElementById("bet-input").value) || 10;
+            mineCount = parseInt(document.getElementById("mine-count").value) || 3;
+            gameStarted = false;
+            generateGrid();
+            renderGrid();
+            updatePotentialWin();
+            collectButton.disabled = true;
+        }
+
+        function sendResultToServer(isWin, winAmount) {
+            fetch("/Games/MinerGame?handler=SaveResult", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    betAmount: betAmount,
+                    winAmount: winAmount,
+                    isWin: isWin
+                })
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success && typeof data.newBalance !== "undefined") {
+                        balance = data.newBalance;
+                        document.getElementById('balance').textContent = balance;
+                    } else {
+                        console.error("❌ Сервер не повернув новий баланс або сталася помилка");
+                    }
+                })
+                .catch(err => {
+                    console.error("❌ Помилка при надсиланні результату:", err);
+                });
+        }
+
+        resetGame();
+        renderGrid();
+
+    </script>
+}
