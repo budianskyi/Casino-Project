@@ -11,6 +11,9 @@ namespace Casino_Project
 
             // Add services to the container.
             builder.Services.AddRazorPages().AddRazorRuntimeCompilation();
+
+            builder.Services.AddControllers();
+
             builder.Services.AddDbContext<AplicationDbContext>(options => options.UseSqlServer(
                     builder.Configuration.GetConnectionString("DefaultConnection")
                 ));
@@ -33,6 +36,7 @@ namespace Casino_Project
             app.UseAuthorization();
 
             app.MapRazorPages();
+            app.MapControllers();
 
             app.Run();
         }
