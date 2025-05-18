@@ -82,6 +82,7 @@
         let balance = parseInt(document.getElementById('balance').textContent);
         let grid = [];
         let gameStarted = false;
+        let resultSent = false;
 
         const gameOverEl = document.getElementById("game-over");
         const collectButton = document.querySelector("button[onclick='collectPrize()']");
@@ -93,8 +94,13 @@
         }
 
         function updatePotentialWin() {
+            if (!gameStarted) {
+                document.getElementById("potential-win").textContent = "0.00";
+                return;
+            }
+
             const potentialWin = betAmount + (revealedSafeCells * 0.1 * betAmount);
-            document.getElementById('potential-win').textContent = potentialWin.toFixed(2);
+            document.getElementById("potential-win").textContent = potentialWin.toFixed(2);
         }
 
         function generateGrid() {
@@ -142,15 +148,56 @@
         }
 
         function collectPrize() {
-            const potentialWin = betAmount + (revealedSafeCells * 0.1 * betAmount);
-            updateBalanceLocally(potentialWin);
+            if (!gameStarted || resultSent) return;
 
-            sendResultToServer(true, potentialWin);
-            showResultMessage(`Ви виграли ${potentialWin.toFixed(2)} монет!`);
+            resultSent = true;
+
+            const winAmount = betAmount + (revealedSafeCells * 0.1 * betAmount);
+            updateBalanceLocally(winAmount);
+
+            console.log("→ Надсилаємо результат на сервер");
+
+            const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+
+            fetch("@Url.Page("Index", "SaveResult")", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "RequestVerificationToken": token
+                },
+                body: JSON.stringify({
+                    betAmount: betAmount,
+                    winAmount: winAmount,
+                    isWin: true
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                console.log("← Відповідь від сервера:", data);
+                if (data.success && typeof data.newBalance !== "undefined") {
+                    balance = data.newBalance;
+                    document.getElementById('balance').textContent = balance;
+                } else {
+                    console.error("❌ Сервер не повернув новий баланс або сталася помилка");
+                }
+            })
+            .catch(err => {
+                console.error("❌ Помилка при надсиланні результату:", err);
+            });
+
+            gameStarted = false;
+
+            // 👇 Скидаємо потенційний виграш
+            document.getElementById("potential-win").textContent = "0.00";
+
             resetGame();
         }
 
+
         function showGameOver() {
+            if (resultSent) return;  // якщо вже відправили результат — не робимо нічого
+            resultSent = true;
+
             gameOverEl.classList.add('show');
             gameOverEl.classList.remove('hidden');
             sendResultToServer(false, 0);
@@ -182,6 +229,7 @@
             }
             updateBalanceLocally(-betAmount);
             gameStarted = true;
+            resultSent = false;   // скидаємо прапорець при початку гри
             generateGrid();
             renderGrid();
             updatePotentialWin();
@@ -192,6 +240,7 @@
             betAmount = parseFloat(document.getElementById("bet-input").value) || 10;
             mineCount = parseInt(document.getElementById("mine-count").value) || 3;
             gameStarted = false;
+            resultSent = false;  // скидаємо прапорець при скиданні гри
             generateGrid();
             renderGrid();
             updatePotentialWin();
