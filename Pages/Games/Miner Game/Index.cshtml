@@ -4,6 +4,47 @@
     ViewData["Title"] = "Мінер 5x5";
 }
 
+<style>
+    .grid {
+        display: grid;
+        grid-template-columns: repeat(5, 40px);
+        grid-template-rows: repeat(5, 40px);
+        gap: 5px;
+        margin-top: 20px;
+    }
+
+    .cell {
+        width: 40px;
+        height: 40px;
+        background-color: #ddd;
+        border: 1px solid #999;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        user-select: none;
+        font-size: 24px;
+    }
+
+        .cell.mine {
+            background-color: #f44336;
+            color: white;
+        }
+
+        .cell.safe {
+            background-color: #8bc34a;
+            color: white;
+        }
+
+    #game-over.show, #result-message.show {
+        display: block;
+    }
+
+    #game-over.hidden, #result-message.hidden {
+        display: none;
+    }
+</style>
+
 <h1>Мінер 5x5</h1>
 <p>
     💣 Кількість мін:
@@ -29,6 +70,8 @@
 <div class="grid" id="grid"></div>
 <div id="game-over" class="hidden">💥 Поразка!</div>
 <div id="result-message" class="hidden"></div>
+
+@Html.AntiForgeryToken()
 
 @section Scripts {
     <script>
@@ -100,6 +143,8 @@
 
         function collectPrize() {
             const potentialWin = betAmount + (revealedSafeCells * 0.1 * betAmount);
+            updateBalanceLocally(potentialWin);
+
             sendResultToServer(true, potentialWin);
             showResultMessage(`Ви виграли ${potentialWin.toFixed(2)} монет!`);
             resetGame();
@@ -137,6 +182,9 @@
             }
             updateBalanceLocally(-betAmount);
             gameStarted = true;
+            generateGrid();
+            renderGrid();
+            updatePotentialWin();
         }
 
         function resetGame() {
@@ -151,10 +199,13 @@
         }
 
         function sendResultToServer(isWin, winAmount) {
-            fetch("/Games/MinerGame?handler=SaveResult", {
+            const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+
+            fetch("/Games/Miner?handler=SaveResult", {
                 method: "POST",
                 headers: {
-                    "Content-Type": "application/json"
+                    "Content-Type": "application/json",
+                    "RequestVerificationToken": token
                 },
                 body: JSON.stringify({
                     betAmount: betAmount,
@@ -162,22 +213,20 @@
                     isWin: isWin
                 })
             })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.success && typeof data.newBalance !== "undefined") {
-                        balance = data.newBalance;
-                        document.getElementById('balance').textContent = balance;
-                    } else {
-                        console.error("❌ Сервер не повернув новий баланс або сталася помилка");
-                    }
-                })
-                .catch(err => {
-                    console.error("❌ Помилка при надсиланні результату:", err);
-                });
+            .then(res => res.json())
+            .then(data => {
+                if (data.success && typeof data.newBalance !== "undefined") {
+                    balance = data.newBalance;
+                    document.getElementById('balance').textContent = balance;
+                } else {
+                    console.error("❌ Сервер не повернув новий баланс або сталася помилка");
+                }
+            })
+            .catch(err => {
+                console.error("❌ Помилка при надсиланні результату:", err);
+            });
         }
 
         resetGame();
-        renderGrid();
-
     </script>
 }
