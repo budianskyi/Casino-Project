@@ -8,11 +8,10 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <Content Remove="Pages\Games\Match 3\index.cshtml" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <None Include="Pages\Games\Match 3\index.cshtml" />
+	  <Compile Remove="wwwroot\NewFolder1\**" />
+	  <Content Remove="wwwroot\NewFolder1\**" />
+	  <EmbeddedResource Remove="wwwroot\NewFolder1\**" />
+	  <None Remove="wwwroot\NewFolder1\**" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -28,6 +27,10 @@
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="wwwroot\images\" />
 	</ItemGroup>
 
 </Project>

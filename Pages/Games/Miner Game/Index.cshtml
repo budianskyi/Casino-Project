@@ -4,6 +4,47 @@
     ViewData["Title"] = "Мінер 5x5";
 }
 
+<style>
+    .grid {
+        display: grid;
+        grid-template-columns: repeat(5, 40px);
+        grid-template-rows: repeat(5, 40px);
+        gap: 5px;
+        margin-top: 20px;
+    }
+
+    .cell {
+        width: 40px;
+        height: 40px;
+        background-color: #ddd;
+        border: 1px solid #999;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        user-select: none;
+        font-size: 24px;
+    }
+
+        .cell.mine {
+            background-color: #f44336;
+            color: white;
+        }
+
+        .cell.safe {
+            background-color: #8bc34a;
+            color: white;
+        }
+
+    #game-over.show, #result-message.show {
+        display: block;
+    }
+
+    #game-over.hidden, #result-message.hidden {
+        display: none;
+    }
+</style>
+
 <h1>Мінер 5x5</h1>
 <p>
     💣 Кількість мін:
@@ -21,7 +62,15 @@
     <button onclick="startGame()">🎮 Почати гру</button>
 </p>
 
-<p>Монети: <span id="balance">@Model.User.Balance</span></p>
+@if (Model.User != null)
+{
+    <p>Монети: <span id="balance">@Model.User.Balance</span></p>
+}
+else
+{
+    <p>Монети: <span id="balance">0</span></p>
+}
+
 <p>📈 Потенційний виграш: <span id="potential-win">0</span></p>
 
 <button onclick="collectPrize()">💎 Забрати приз</button>
@@ -29,6 +78,8 @@
 <div class="grid" id="grid"></div>
 <div id="game-over" class="hidden">💥 Поразка!</div>
 <div id="result-message" class="hidden"></div>
+
+@Html.AntiForgeryToken()
 
 @section Scripts {
     <script>
@@ -39,6 +90,7 @@
         let balance = parseInt(document.getElementById('balance').textContent);
         let grid = [];
         let gameStarted = false;
+        let resultSent = false;
 
         const gameOverEl = document.getElementById("game-over");
         const collectButton = document.querySelector("button[onclick='collectPrize()']");
@@ -50,8 +102,13 @@
         }
 
         function updatePotentialWin() {
+            if (!gameStarted) {
+                document.getElementById("potential-win").textContent = "0.00";
+                return;
+            }
+
             const potentialWin = betAmount + (revealedSafeCells * 0.1 * betAmount);
-            document.getElementById('potential-win').textContent = potentialWin.toFixed(2);
+            document.getElementById("potential-win").textContent = potentialWin.toFixed(2);
         }
 
         function generateGrid() {
@@ -99,13 +156,55 @@
         }
 
         function collectPrize() {
-            const potentialWin = betAmount + (revealedSafeCells * 0.1 * betAmount);
-            sendResultToServer(true, potentialWin);
-            showResultMessage(`Ви виграли ${potentialWin.toFixed(2)} монет!`);
+            if (!gameStarted || resultSent) return;
+
+            resultSent = true;
+
+            const winAmount = revealedSafeCells * 0.1 * betAmount;
+            updateBalanceLocally(winAmount);
+
+            console.log("→ Надсилаємо результат на сервер");
+
+            const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+
+            fetch("@Url.Page("Index", "SaveResult")", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "RequestVerificationToken": token
+                },
+                body: JSON.stringify({
+                    betAmount: betAmount,
+                    winAmount: winAmount,
+                    isWin: true
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                console.log("← Відповідь від сервера:", data);
+                if (data.success && typeof data.newBalance !== "undefined") {
+                    balance = data.newBalance;
+                    document.getElementById('balance').textContent = balance;
+                } else {
+                    console.error("❌ Сервер не повернув новий баланс або сталася помилка");
+                }
+            })
+            .catch(err => {
+                console.error("❌ Помилка при надсиланні результату:", err);
+            });
+
+            gameStarted = false;
+
+            // Скидаємо потенційний виграш
+            document.getElementById("potential-win").textContent = "0.00";
+
             resetGame();
         }
 
         function showGameOver() {
+            if (resultSent) return;  // якщо вже відправили результат — не робимо нічого
+            resultSent = true;
+
             gameOverEl.classList.add('show');
             gameOverEl.classList.remove('hidden');
             sendResultToServer(false, 0);
@@ -137,6 +236,10 @@
             }
             updateBalanceLocally(-betAmount);
             gameStarted = true;
+            resultSent = false;   // скидаємо прапорець при початку гри
+            generateGrid();
+            renderGrid();
+            updatePotentialWin();
         }
 
         function resetGame() {
@@ -151,10 +254,21 @@
         }
 
         function sendResultToServer(isWin, winAmount) {
-            fetch("/Games/MinerGame?handler=SaveResult", {
+            console.log("📤 Надсилання результату:", { isWin, winAmount });
+
+            if (resultSent) {
+                console.warn("⚠️ Повторне надсилання заблоковано");
+                return;
+            }
+
+            resultSent = true;
+            const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+
+            fetch("@Url.Page("Index", "SaveResult")", {
                 method: "POST",
                 headers: {
-                    "Content-Type": "application/json"
+                    "Content-Type": "application/json",
+                    "RequestVerificationToken": token
                 },
                 body: JSON.stringify({
                     betAmount: betAmount,
@@ -162,22 +276,23 @@
                     isWin: isWin
                 })
             })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.success && typeof data.newBalance !== "undefined") {
-                        balance = data.newBalance;
-                        document.getElementById('balance').textContent = balance;
-                    } else {
-                        console.error("❌ Сервер не повернув новий баланс або сталася помилка");
-                    }
-                })
-                .catch(err => {
-                    console.error("❌ Помилка при надсиланні результату:", err);
-                });
+            .then(res => res.json())
+            .then(data => {
+                if (data.success && typeof data.newBalance !== "undefined") {
+                    balance = data.newBalance;
+                    document.getElementById('balance').textContent = balance;
+                } else {
+                    console.error("❌ Сервер не повернув новий баланс або сталася помилка");
+                }
+            })
+            .catch(err => {
+                console.error("❌ Помилка при надсиланні результату:", err);
+            });
         }
 
-        resetGame();
-        renderGrid();
-
+        // Ініціалізація гри при завантаженні сторінки
+        window.onload = () => {
+            resetGame();
+        };
     </script>
 }

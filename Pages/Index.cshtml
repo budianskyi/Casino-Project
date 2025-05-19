@@ -15,44 +15,38 @@
 </head>
 <body>
     <div class="container text-center mt-5">
-        <h1>Ласкаво просимо до Casino Royale!</h1>
-        <p>Відчуйте азарт, обирайте свої ігри та вигравайте великі призи.</p>
+        <img src="@Url.Content("~/images/Лого.png")" alt="Casino Royale" style="height: 600px;" />
+        <p class="mt-3">Відчуйте азарт, обирайте свої ігри та вигравайте великі призи.</p>
+    </div>
 
         <div class="row mt-5">
-            <div class="col-md-4 mb-4">
-                <div class="game-card">
-                    <i class="fas fa-dice"></i>
-                    <h4>Гра в кості</h4>
-                    <p>Поставте на кістки і спробуйте свою удачу!</p>
-                    <a class="btn btn-warning btn-lg" asp-page="/Games/Dice Game/Index">Грати</a>
-                </div>
+        <div class="col-md-4 mb-4">
+            <div class="game-card">
+                <img src="@Url.Content("~/images/Кості.png")" alt="Гра в кості" class="game-image" />
+                <h4>Гра в кості</h4>
+                <p>Поставте на кістки і спробуйте свою удачу!</p>
+                <a class="btn btn-warning btn-lg" asp-page="/Games/Dice Game/Index">Грати</a>
             </div>
-            <div class="col-md-4 mb-4">
-                <div class="game-card">
-                    <i class="fas fa-coins"></i>
-                    <h4>Мінер</h4>
-                    <p>Обери правильне поле для великого кушу!</p>
-                    <a class="btn btn-warning btn-lg" asp-page="/Games/Miner Game/Index">Грати</a>
-                </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="game-card">
+                <img src="@Url.Content("~/images/Мінер.png")" alt="Мінер" class="game-image" />
+                <h4>Мінер</h4>
+                <p>Обери правильне поле для великого кушу!</p>
+                <a class="btn btn-warning btn-lg" asp-page="/Games/Miner Game/Index">Грати</a>
             </div>
-            <div class="col-md-4 mb-4">
-                <div class="game-card">
-                    <i class="fas fa-poker-chip"></i>
-                    <h4>Покер</h4>
-                    <p>Спільно з іншими гравцями грайте в покер!</p>
-                    <button class="btn btn-warning btn-lg">Грати</button>
-                </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="game-card">
+                <img src="@Url.Content("~/images/3вряд.png")" alt="3 в ряд" class="game-image" />
+                <h4>3 в ряд</h4>
+                <p>Навіть діти можуть грати! Протестуй свою удачу!</p>
+                <a class="btn btn-warning btn-lg" asp-page="/Games/MatchThree/Index">Грати</a>
             </div>
-            <div class="col-md-4 mb-4">
-                <div class="game-card">
-                    <i class="fas fa-apple-alt"></i>
-                    <h4>3 в ряд</h4>
-                    <p>Навіть діти можуть грати!</p>
-                    <a class="btn btn-warning btn-lg" asp-page="/Games/Match 3/Index">Грати</a>
-                </div>
             </div>
         </div>        
-    </div>
+  
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
