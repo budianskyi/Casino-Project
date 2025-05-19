@@ -24,7 +24,7 @@ namespace Casino_Project.Pages.Games.Dice_Game
         public void OnPost()
         {
             // Тестово — вибір першого користувача
-            var dbUser = _context.User.FirstOrDefault(); // в реальному проекті — через логін
+            var dbUser = _context.Users.FirstOrDefault(); // в реальному проекті — через логін
 
             if (dbUser == null)
             {

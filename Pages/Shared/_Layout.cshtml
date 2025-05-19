@@ -8,15 +8,25 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
-    <link rel="stylesheet" href="~/Casino_Project.styles.css" asp-append-version="true" />    
-
+    <link rel="stylesheet" href="~/Casino_Project.styles.css" asp-append-version="true" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 
     <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+            body > .container {
+                flex: 1;
+            }
+
         body {
-            background: linear-gradient(45deg, #141e30, #243b55);
-            color: #fff;
+            background: linear-gradient(45deg, #141e30, #141e30);
+            color: #f1c40f;
             font-family: 'Arial', sans-serif;
         }
 
@@ -72,38 +82,53 @@
         }
 
         .game-card {
-            background-color: #2c3e50;
-            border-radius: 15px;
-            color: #fff;
+            text-align: center;
             padding: 20px;
-            transition: transform 0.3s;
+            background-color: transparent; /* Прозорий фон */
+            border-radius: 12px;
         }
 
-            .game-card:hover {
-                transform: scale(1.05);
-            }
+        .game-image {
+            max-width: 100%;
+            height: auto;
+            margin-bottom: 15px;
+            background-color: transparent; /* Прозорий фон зображення */
+        }
 
-            .game-card i {
-                font-size: 3rem;
-                margin-bottom: 15px;
-            }
+        .game-card h4 {
+            color: #ffd700; /* Золотий колір */
+            font-size: 24px;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5); /* Тінь для тексту */
+        }
 
-            .game-card h4 {
-                font-size: 1.5rem;
-                font-weight: bold;
-                margin-bottom: 10px;
-            }
+        .game-card p {
+            color: #ffd700; /* Золотий колір */
+            margin: 10px 0;
+            font-size: 18px;
+        }
 
-            .game-card p {
-                font-size: 1.2rem;
-            }
+        .game-card .btn {
+            margin-top: 10px;
+            color: #fff;
+            background-color: #ffc107;
+            border: none;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+       
     </style>
 </head>
 <body>
     <header>
         <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #000;">
             <div class="container-fluid">
-                <a class="navbar-brand" asp-page="/Index"><i class="fas fa-dice"></i> Casino Royale</a>
+                <a class="navbar-brand" asp-page="/Index">
+                    <img src="@Url.Content("~/images/Лого.png")" alt="Casino Royale" style="height: 50px; width: auto;" />
+                </a>
+
+
 
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
                         aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -122,6 +147,9 @@
                             <a class="nav-link" asp-page="/Games/Miner Game/Index"><i class="fas fa-coins"></i> Мінер</a>
                         </li>
                         <li class="nav-item">
+                            <a class="nav-link" asp-page="/Games/MatchThree/Index"><i class="fas fa-coins"></i> 3 в ряд</a>
+                        </li>
+                        <li class="nav-item">
                             <a class="nav-link" asp-page="/Support"><i class="fas fa-headset"></i> Підтримка</a>
                         </li>
                     </ul>
@@ -134,19 +162,19 @@
         </nav>
     </header>
 
-
-
     <div class="container">
         <main role="main" class="pb-3">
             @RenderBody()
         </main>
     </div>
 
-    <footer class="border-top footer text-muted">
+    <footer class="border-top footer" style="color: #f1c40f;">
         <div class="container">
-            &copy; 2025 - Casino_Project - <a asp-area="" asp-page="/Privacy">Privacy</a>
+            &copy; 2025 - Casino_Project - <a asp-area="" asp-page="/Privacy" style="color: #f1c40f;">Privacy</a>
         </div>
     </footer>
+
+
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>

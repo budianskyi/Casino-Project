@@ -16,7 +16,7 @@ namespace Casino_Project.Pages.Users
         }
         public void OnGet()
         {
-            Users = _db.User;
+            Users = _db.Users;
         }
     }
 }
