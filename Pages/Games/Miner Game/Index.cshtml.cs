@@ -23,38 +23,39 @@ namespace Casino_Project.Pages.Games.Miner
             User = _context.User.FirstOrDefault();
         }
 
-        [ValidateAntiForgeryToken]
+        [IgnoreAntiforgeryToken]
         public IActionResult OnPostSaveResult([FromBody] MinerGameResult result)
         {
             var user = _context.User.FirstOrDefault();
             if (user == null)
-                return NotFound();
-
-            // Перевірка, чи такий результат вже був зафіксований
-            bool alreadySaved = _context.MinerGameResults.Any(r => r.UserId == user.Id && r.PlayedAt == result.PlayedAt);
-            if (alreadySaved)
             {
-                return new JsonResult(new { success = false, message = "Result already saved." });
+                Console.WriteLine("❌ Користувача не знайдено");
+                return NotFound();
             }
 
             result.UserId = user.Id;
             result.PlayedAt = DateTime.Now;
 
-            //Console.WriteLine($"[DEBUG] Баланс до: {user.Balance}");
+            Console.WriteLine($"🎯 Виграш: {result.IsWin}, Сума: {result.WinAmount}, Ставка: {result.BetAmount}");
 
             if (result.IsWin)
+            {
+                Console.WriteLine($"💰 Баланс ДО: {user.Balance}");
                 user.Balance += (int)result.WinAmount;
+                Console.WriteLine($"✅ Баланс ПІСЛЯ: {user.Balance}");
+            }
             else
+            {
                 user.Balance -= result.BetAmount;
-
-            Console.WriteLine($"[DEBUG] Баланс після: {user.Balance}");
+            }
 
             _context.MinerGameResults.Add(result);
-            _context.Entry(user).State = EntityState.Modified;
+
+            // Примусово вказуємо EF, що баланс змінено
             _context.Entry(user).Property(u => u.Balance).IsModified = true;
 
-            var saved = _context.SaveChanges();
-            //Console.WriteLine($"[DEBUG] SaveChanges -> {saved} рядків");
+            int changes = _context.SaveChanges();
+            Console.WriteLine($"🧾 SaveChanges(): {changes}");
 
             return new JsonResult(new { success = true, newBalance = user.Balance });
         }
