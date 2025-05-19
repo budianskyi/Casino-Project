@@ -1,7 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Casino_Project.Model
 {
+    [Table("Users")]
     public class User
     {
         [Key]

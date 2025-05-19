@@ -1,0 +1,536 @@
+﻿@page
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Казино 3 в ряд</title>
+    <style>
+        body {
+            background-color: #111;
+            color: white;
+            font-family: sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: row;
+            align-items: flex-start;
+            gap: 140px;
+            margin-top: 20px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-rows: repeat(3, 60px);
+            gap: 80px;
+        }
+
+        .cell {
+            width: 120px;
+            height: 120px;
+            border: 2px solid white;
+            border-radius: 8px;
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .button {
+            width: 250px;
+            height: 80px;
+            background-color: #444;
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 26px;
+            cursor: pointer;
+            user-select: none;
+            transition: background-color 0.3s;
+        }
+
+            .button:hover {
+                background-color: #666;
+            }
+
+        .input-bet {
+            width: 250px;
+            height: 50px;
+            font-size: 24px;
+            border-radius: 8px;
+            border: none;
+            padding: 0 10px;
+            background-color: #222;
+            color: white;
+            text-align: center;
+        }
+
+        .test-button {
+            margin-top: 60px;
+            width: 200px;
+            height: 60px;
+            background-color: #555;
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 20px;
+            cursor: pointer;
+            user-select: none;
+            transition: background-color 0.3s;
+        }
+
+            .test-button:hover {
+                background-color: #777;
+            }
+
+        @@keyframes fall {
+            0% {
+                transform: translateY(-420px);
+                /*opacity: 0;*/
+            }
+
+            100% {
+                transform: translateY(0);
+                /*opacity: 1;*/
+            }
+        }
+
+        .cell.falling3 {
+            animation: fall 0.6s ease-out;
+        }
+
+        @@keyframes fall2 {
+            0% {
+                transform: translateY(-280px);
+            }
+
+            100% {
+                transform: translateY(0);
+            }
+        }
+
+        .cell.falling2 {
+            animation: fall2 0.4s ease-out;
+        }
+
+        @@keyframes fall1 {
+            0% {
+                transform: translateY(-140px);
+            }
+
+            100% {
+                transform: translateY(0);
+            }
+        }
+
+        .cell.falling1 {
+            animation: fall1 0.2s ease-out;
+        }
+
+
+        @@keyframes disappear {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+
+            50% {
+                transform: scale(1.1);
+                opacity: 0.5;
+            }
+
+            100% {
+                transform: scale(0.4);
+                opacity: 0;
+            }
+        }
+
+        .cell.disappear {
+            animation: disappear 0.4s linear forwards;
+            z-index: 2;
+            position: relative;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Баланс игрока -->
+    <h2 id="balanceDisplay">Баланс: 100</h2>
+
+    <div class="container">
+        <!-- Сетка для квадратов -->
+        <div id="grid" class="grid"></div>
+
+        <!-- Блок управления -->
+        <div class="controls">
+            <div class="button" onclick="spin()">🎰 ВРАЩАТЬ</div>
+            <input type="number" id="betAmount" class="input-bet" placeholder="Введите ставку">
+            <div id="game-status" style="margin-top: 10px; font-weight: bold; font-size: 24px;"></div>
+            <!-- <div class="button" onclick="repeatLastSpin()">🔁 Повторить</div> -->
+        </div>
+
+        <pre id="debugOutput" style="margin-top: 40px; color: #0f0;"></pre>
+    </div>
+
+    <!-- Тестовые кнопки для разработчиков -->
+    <!-- <div style="display: flex; gap: 20px; margin-top: 60px;">
+        <div class="test-button" onclick="devMove()">Ход</div>
+        <div class="test-button" onclick="addMoney()">ТАПАТЬ ХОМЯКА</div>
+    </div> -->
+
+    <script>
+        let lastMoveWasEmpty = false;
+        const reactions = ["Ничего себе!", "Круто!", "Ура!", "Везунчик!", "Отлично!"];
+        let deleteCounterGlobal = 0;
+
+        function setGameStatus(text) {
+            const statusDiv = document.getElementById("game-status");
+            if (statusDiv) {
+                statusDiv.innerHTML = text;  // Используем innerHTML, чтобы интерпретировать HTML
+            }
+        }
+
+
+        // Возможные цвета
+        const colors = [
+            { color: '#12422A' }, { color: '#FF4444' }, { color: '#44FF44' },
+            { color: '#4444FF' }, { color: '#FFFF44' }, { color: '#44FFFF' }
+        ];
+
+        let fallingFlags = []; // массив булевых флагов, показывает какие клетки анимируются
+        let currentGrid = [];
+        let balance = 100;
+        let lastBet = 0;
+        let savedGrids = []; // ← история сеток
+        let hasSpinResult = false; // ← разрешение повтора
+        let deletedCounts = [];
+
+
+        function updateBalanceDisplay() {
+            document.getElementById('balanceDisplay').innerText = `Баланс: ${balance.toFixed(2)}`;
+        }
+
+        function initGrid(columns = 5) {
+            const grid = document.getElementById('grid');
+            grid.innerHTML = '';
+            grid.style.gridTemplateColumns = `repeat(${columns}, 60px)`;
+
+            for (let i = 0; i < 3 * columns; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'cell';
+                cell.style.backgroundColor = '#444';
+                grid.appendChild(cell);
+            }
+        }
+
+        function initFallingFlags(columns = 5, rows = 3) {
+            fallingFlags = Array.from({ length: columns }, () => Array(rows).fill(false));
+        }
+
+        /*function showFullGrid() {
+            const maxHeight = Math.max(...currentGrid.map(col => col.length));
+            let output = '';
+
+            for (let y = 0; y < maxHeight; y++) {
+                for (let x = 0; x < currentGrid.length; x++) {
+                    const cell = currentGrid[x][y];
+                    output += (cell !== undefined ? cell.toString().padStart(2, ' ') : ' .') + ' ';
+                }
+                output += '\n';
+            }
+
+            document.getElementById('debugOutput').textContent = output;
+        }*/
+
+        async function spin() {
+            try {
+                lastMoveWasEmpty = false;
+
+                const betInput = document.getElementById('betAmount');
+                let betValue = parseFloat(betInput.value);
+
+                if (isNaN(betValue) || betValue < 0) {
+                    betValue = 0;
+                }
+
+                if (balance <= 0) {
+                    betValue = 0;
+                } else if (betValue > balance) {
+                    betValue = balance;
+                }
+
+                deletedCounts.fill(0);
+                lastBet = betValue;
+                balance -= betValue;
+                updateBalanceDisplay();
+                betInput.value = '';
+
+                const response = await fetch('/api/SpinRhyker/spin');
+                const result = await response.json();
+                const gridData = result.grid;
+
+                savedGrids.push(gridData);
+                hasSpinResult = true;
+
+                updateGrid(gridData);
+                // showFullGrid(); // тоже закомментировано
+                startDevMoveLoop();
+                setGameStatus("Началась игра");
+                deleteCounterGlobal = 0;
+
+            } catch (error) {
+                console.error('Ошибка при получении данных от сервера:', error);
+            }
+        }
+
+        /*function repeatLastSpin() {
+            if (!hasSpinResult || savedGrids.length === 0) {
+                console.warn("Нет сохранённых ходов для повтора");
+                return;
+            }
+
+            const lastGrid = savedGrids[savedGrids.length - 1];
+            updateGrid(lastGrid);
+            showFullGrid();
+        }*/
+
+        function updateGrid(gridData) {
+            currentGrid = gridData.map(column => [...column]);
+
+            const columns = currentGrid.length;
+            const rows = 3;
+            fallingFlags = Array.from({ length: columns }, () => Array(rows).fill(true));
+
+            drawGrid(true);
+        }
+
+        function drawGrid(isNew = false) {
+            const grid = document.getElementById('grid');
+            const columns = currentGrid.length;
+            const rows = 3;
+
+            grid.innerHTML = '';
+            grid.style.gridTemplateColumns = `repeat(${columns}, 60px)`;
+
+            for (let row = rows - 1; row >= 0; row--) {
+                for (let col = 0; col < columns; col++) {
+                    const column = currentGrid[col];
+                    const indexFromBottom = column.length - 1 - row;
+                    const index = indexFromBottom >= 0 ? column[indexFromBottom] : null;
+                    const key = `${col}_${row}`;
+
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    cell.dataset.key = key;
+                    cell.style.backgroundColor = colors[index]?.color || '#444';
+
+                    if (isNew && fallingFlags[col][row]) {
+                        const temp = deletedCounts[col] || 0;
+
+                        switch (temp) {
+                            case 1:
+                                cell.classList.add('falling1');
+                                break;
+                            case 2:
+                                cell.classList.add('falling2');
+                                break;
+                            case 3:
+                                cell.classList.add('falling3');
+                                break;
+                            default:
+                                cell.classList.add('falling3');
+                                break;
+                        }
+                    }
+
+                    grid.appendChild(cell);
+                }
+            }
+        }
+
+        function inRange(value, min, max) {
+            return value >= min && value <= max;
+        }
+
+        function checkSequences(source, x, y, color, oldX, oldY) {
+            if (!inRange(x, 0, source.length - 1) || !inRange(y, 0, source[x].length - 1)) {
+                return 0;
+            } else if (source[x][y] === color) {
+                return checkSequences(source, x + (x - oldX), y + (y - oldY), color, x, y) + 1;
+            } else {
+                return 0;
+            }
+        }
+
+        function checkSequencesAll(source, x, y, color = 0) {
+            if (color === 0)
+                color = source[x][y];
+
+            const result = [0, 0, 0, 0];
+            let i = 0;
+            let j = 1;
+
+            for (let k = 0; k < 4; k++) {
+                result[k]++;
+                result[k] += checkSequences(source, x + i, y + j, color, x, y);
+                result[k] += checkSequences(source, x - i, y - j, color, x, y);
+                i++;
+                if (i > 1) {
+                    i = 1;
+                    j--;
+                }
+            }
+
+            return result;
+        }
+
+        function devMove() {
+            if (currentGrid.length === 0) return;
+
+            const columns = currentGrid.length;
+            const rows = 3;
+            let deleteCounter = 0;
+
+            const visibleGrid = Array.from({ length: columns }, (_, col) => {
+                const column = currentGrid[col];
+                const result = [];
+                for (let i = 0; i < rows; i++) {
+                    const indexFromBottom = column.length - 1 - i;
+                    result.push(indexFromBottom >= 0 ? column[indexFromBottom] : 0);
+                }
+                return result;
+            });
+
+            const toDelete = Array.from({ length: columns }, () => Array(rows).fill(false));
+            let foundMatch = false;
+
+            for (let x = 0; x < columns; x++) {
+                for (let y = 0; y < rows; y++) {
+                    const color = visibleGrid[x][y];
+                    if (color !== undefined && color !== null && color !== 0) {
+                        const sequences = checkSequencesAll(visibleGrid, x, y, color);
+                        for (let seq of sequences) {
+                            if (seq >= 3) {
+                                toDelete[x][y] = true;
+                                foundMatch = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            fallingFlags = Array.from({ length: columns }, () => Array(rows).fill(false));
+
+            for (let x = 0; x < columns; x++) {
+                for (let y = 0; y < rows; y++) {
+                    if (toDelete[x][y]) {
+                        for (let yAbove = y; yAbove < rows; yAbove++) {
+                            fallingFlags[x][yAbove] = true;
+                        }
+                    }
+                }
+            }
+
+            if (!foundMatch) {
+                console.log("Ничего не найдено для удаления");
+                lastMoveWasEmpty = true;
+                endGameSummary(deleteCounterGlobal, lastBet);
+                return;
+            }
+
+            setGameStatus(reactions[Math.floor(Math.random() * reactions.length)]);
+
+            lastMoveWasEmpty = false;
+
+            deletedCounts.fill(0); // очищаем все 5 колонок
+
+            const grid = document.getElementById('grid');
+            const cellsToRemove = [];
+
+            for (let x = 0; x < columns; x++) {
+                for (let y = 0; y < rows; y++) {
+                    if (toDelete[x][y]) {
+                        const key = `${x}_${y}`;
+                        const cell = grid.querySelector(`[data-key="${key}"]`);
+                        if (cell) {
+                            cell.classList.add('disappear');
+                            cellsToRemove.push({ col: x, row: y, index: currentGrid[x].length - 1 - y });
+                        }
+                        deletedCounts[x]++;
+                    }
+                }
+            }
+
+            setTimeout(() => {
+                for (let item of cellsToRemove) {
+                    const col = currentGrid[item.col];
+                    col.splice(item.index, 1);
+                    deleteCounter++;
+                    while (col.length < 3) col.unshift(0);
+                }
+
+                drawGrid(true);
+
+                if (deleteCounter > 0) {
+                    const reward = deleteCounter * 0.2 * lastBet;
+                    balance += reward;
+                    console.log(`deleteCounterGlobal: ${deleteCounter.toFixed(2)}`);
+                    console.log(`Получено за ход: ${reward.toFixed(2)}`);
+                    updateBalanceDisplay();
+                }
+                deleteCounterGlobal = deleteCounterGlobal + deleteCounter;
+            }, 400);
+        }
+
+        function endGameSummary(disappearedCount, stake) {
+            if (stake === 0 || disappearedCount === 5) {
+                setGameStatus("Вы не выиграли,<br>но и не проиграли.");
+            } else if (disappearedCount < 5) {
+                delta = -(stake * (5 - disappearedCount) * 0.2);
+                setGameStatus(`Вы потеряли ${Math.abs(delta).toFixed(2)} денег.`);
+            } else {
+                delta = stake * (disappearedCount - 5) * 0.2;
+                setGameStatus(`Вы получили ${delta.toFixed(2)} денег.`);
+            }
+        }
+
+
+        function addMoney() {
+            balance += 10;
+            updateBalanceDisplay();
+        }
+
+        let moveInterval = null;
+
+        function startDevMoveLoop() {
+            if (moveInterval) {
+                clearInterval(moveInterval);
+            }
+
+            moveInterval = setInterval(() => {
+                if (!lastMoveWasEmpty) {
+                    devMove();
+                }
+            }, 1200);
+        }
+
+        startDevMoveLoop();
+
+        initGrid();
+        initFallingFlags();
+        updateBalanceDisplay();
+    </script>
+</body>
+
+</html>
