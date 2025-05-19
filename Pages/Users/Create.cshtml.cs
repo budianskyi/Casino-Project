@@ -26,7 +26,7 @@ namespace Casino_Project.Pages.Users
             }
             if (ModelState.IsValid)
             {
-                await _db.User.AddAsync(user);
+                await _db.Users.AddAsync(user);
                 await _db.SaveChangesAsync();
 
                 TempData["success"] = "User created successfully";

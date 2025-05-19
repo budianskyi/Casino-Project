@@ -16,7 +16,7 @@ namespace Casino_Project.Pages.Users
         }
         public void OnGet(int id)
         {
-            User = _db.User.Find(id);
+            User = _db.Users.Find(id);
         }
 
         public async Task<IActionResult> OnPost(User user)
@@ -27,7 +27,7 @@ namespace Casino_Project.Pages.Users
             }
             if (ModelState.IsValid)
             {
-                _db.User.Update(user);
+                _db.Users.Update(user);
                 await _db.SaveChangesAsync();
 
                 TempData["success"] = "User updated successfully";
