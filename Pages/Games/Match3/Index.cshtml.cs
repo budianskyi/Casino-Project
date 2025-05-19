@@ -42,7 +42,7 @@ namespace Casino_Project.Pages.Games.Match3
 
             if (MyUser != null)
             {
-                MyUser.Balance = 123;
+                MyUser.Balance = 1265;
                 _context.SaveChanges(); // Сохраняем изменения в базу данных
             }
             return;
@@ -51,6 +51,16 @@ namespace Casino_Project.Pages.Games.Match3
         {
             try
             {
+                if (MyUser == null)
+                {
+                    Console.WriteLine("УСЕР НУЛЛ! _");
+                    //MyUser = _context.User.FirstOrDefault();  // ДЛЯ ВАС!
+                    MyUser = new User(); // инициализируешь здесь
+                    MyUser.Balance = 1265;  // тестговна
+                }
+
+                Console.WriteLine("Начальный баланс: " + MyUser.Balance);
+
                 using var reader = new StreamReader(Request.Body);
                 var body = await reader.ReadToEndAsync(); // 🔁 Используем await
 
@@ -59,14 +69,16 @@ namespace Casino_Project.Pages.Games.Match3
                 double input = JsonSerializer.Deserialize<double>(body);
                 Console.WriteLine("OnPostSpin вызван! Ставка: " + input);
 
-                SpinRhykerController temp2 = new SpinRhykerController();
-                return new JsonResult(new { grid = temp2.GetSpinResult().data });
+                //SpinRhykerController temp2 = new SpinRhykerController();
+                //return new JsonResult(new { grid = temp2.GetSpinResult().data });
+
                 if (MyUser.Balance < input)
                     return new JsonResult(new { error = "bad balance" }) { StatusCode = 227 };
                 else
                 {
                     MyUser.Balance -= input;
                 }
+
                 SpinRhykerController temp = new SpinRhykerController(); // от такого дерьмокода даже я в ахуе. но вроде должно работать
                 GridAndInt aboba = temp.GetSpinResult();
                 if (aboba.amt < 0)
@@ -75,6 +87,9 @@ namespace Casino_Project.Pages.Games.Match3
                 {
                     MyUser.Balance += input / 5 * aboba.amt;
                 }
+
+                Console.WriteLine("Конечный баланс: " + MyUser.Balance);
+                _context.SaveChanges(); // Сохраняем изменения в базу данных
                 // какой то код
                 return new JsonResult(new { grid = aboba.data });
             }

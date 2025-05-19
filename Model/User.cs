@@ -11,5 +11,12 @@ namespace Casino_Project.Model
         [Required]
         public string UserName { get; set; }
         public double Balance { get; set; }
+
+        public User()
+        {
+            Id = 0;
+            UserName = "Test";
+            Balance = 100;
+        }
     }
 }

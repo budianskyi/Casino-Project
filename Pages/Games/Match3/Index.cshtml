@@ -279,28 +279,30 @@
                 betInput.value = '';
 
                 //const response = await fetch('/api/SpinRhyker/spin');
-        const response = await fetch('/Games/Match3', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-        body: JSON.stringify({ bet: 100.1 })
-
-        });
-
-
-
+                const response = await fetch('/Games/Match3', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(lastBet)
+                });
 
 
                 if (!response.ok) {
                     const err = await response.json();
                     console.error('Ошибка:', err.error, 'Код:', response.status);
                     return;
-                }
+                }       
 
                 const result = await response.json();
-                const gridData = result.grid;
 
+                if (!result.grid || !Array.isArray(result.grid)) {
+                    console.error('Неверный формат ответа от сервера');
+                    console.log('Ответ от сервера:', result);
+                    return;
+                }
+
+                const gridData = result.grid;
                 savedGrids.push(gridData);
                 hasSpinResult = true;
 
