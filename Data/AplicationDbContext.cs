@@ -11,7 +11,7 @@ namespace Casino_Project.Data
         {
             
         }
-        public DbSet<User> User { get; set; }
+        public DbSet<User> Users { get; set; } // Замінив User на Users через конфлікт імен в Azure
         public DbSet<DiceGame> DiceGames { get; set; }
         public DbSet<MinerGameResult> MinerGameResults { get; set; }
 

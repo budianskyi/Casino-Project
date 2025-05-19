@@ -17,15 +17,15 @@ namespace Casino_Project.Pages.Users
         }
         public void OnGet(int id)
         {
-            User = _db.User.Find(id);
+            User = _db.Users.Find(id);
         }
 
         public async Task<IActionResult> OnPost()
         {
-            var userFromDb = _db.User.Find(User.Id);
+            var userFromDb = _db.Users.Find(User.Id);
             if(userFromDb != null)
             {
-                _db.User.Remove(userFromDb);
+                _db.Users.Remove(userFromDb);
                 await _db.SaveChangesAsync();
 
                 TempData["success"] = "User deleted successfully";

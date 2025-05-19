@@ -20,13 +20,13 @@ namespace Casino_Project.Pages.Games.Miner
 
         public void OnGet()
         {
-            User = _context.User.FirstOrDefault();
+            User = _context.Users.FirstOrDefault();
         }
 
         [IgnoreAntiforgeryToken]
         public IActionResult OnPostSaveResult([FromBody] MinerGameResult result)
         {
-            var user = _context.User.FirstOrDefault();
+            var user = _context.Users.FirstOrDefault();
             if (user == null)
             {
                 Console.WriteLine("❌ Користувача не знайдено");
