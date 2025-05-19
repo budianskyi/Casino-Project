@@ -7,11 +7,11 @@ namespace RhykerHackarryV1.Controllers // Пространство имён, в 
     [Route("api/[controller]")] // Автоматически задаёт маршрут api/Spin, если класс называется SpinController
     public class SpinRhykerController : Controller // Наследуемся от базового контроллера API
     {
-        static int Rows = 3;              // Количество строк (высота грида)
-        static int Columns = 5; // Минимальное количество колонок (ширина)
-        static int AmtColors = 4; // Количество типов цветов (0, 1, 2, 3)
-        static int BudgetDeviat = 0;
-        static int ZeroBlyat = 0;
+        const int Rows = 3;              // Количество строк (высота грида)
+        const int Columns = 5; // Минимальное количество колонок (ширина)
+        const int AmtColors = 4; // Количество типов цветов (0, 1, 2, 3)
+        int BudgetDeviat = 0;
+        int ZeroBlyat = 0;
 
         private bool InRange(int source, int min, int max)
         {
@@ -195,16 +195,6 @@ namespace RhykerHackarryV1.Controllers // Пространство имён, в 
             return;
         }
 
-        public struct GridAndInt
-        {
-            public int amt;
-            public List<int>[] data;
-            public GridAndInt(int AMT, List<int>[] DATA)
-            {
-                amt = AMT;
-                data = DATA;
-            }
-        }
 
         struct Sequence
         {
@@ -254,14 +244,12 @@ namespace RhykerHackarryV1.Controllers // Пространство имён, в 
 
         //[HttpGet("balance")] // Метод вызывается по GET-запросу: /api/Spin/spin
 
-        //[HttpGet("spin")] // Метод вызывается по GET-запросу: /api/Spin/spin
+        [HttpGet("spin")] // Метод вызывается по GET-запросу: /api/Spin/spin
 
-        //public IActionResult GetSpinResult(int getbet = 100)
-        public GridAndInt GetSpinResult(int getbet = 100)
+        public IActionResult GetSpinResult(int getbet = 100)
         {
-            //Console.WriteLine();
-            //Console.WriteLine("СТАРТСТАРТСТАРТСТАРТСТАРТСТАРТСТАРТСТАРТСТАРТ");
-            int amtDelete = 0;
+            Console.WriteLine();
+            Console.WriteLine("СТАРТСТАРТСТАРТСТАРТСТАРТСТАРТСТАРТСТАРТСТАРТ");
             int bet = getbet;
             var rnd = new Random(); // Генератор случайных чисел
 
@@ -329,12 +317,10 @@ namespace RhykerHackarryV1.Controllers // Пространство имён, в 
                         deleteGrid[i][j] = deleteGrid[i][j] || (seq[k] > 2);
                         delete = delete || (seq[k] > 2);
                     }
-                    if (deleteGrid[i][j])
-                        amtDelete++;
                 }
             }
 
-            /*Console.WriteLine("Текущее состояние grid:");
+            Console.WriteLine("Текущее состояние grid:");
             for (int y = Rows - 1; y >= 0; y--)  // Перебираем строки
             {
                 string row = "";
@@ -345,14 +331,12 @@ namespace RhykerHackarryV1.Controllers // Пространство имён, в 
                 }
                 Console.WriteLine(row.Trim());  // Печатаем строку
             }
-            Console.WriteLine(); // Пустая строка для разделения*/
+            Console.WriteLine(); // Пустая строка для разделения
 
             if (!delete)
             {
-                GridAndInt tempRes = new GridAndInt(amtDelete, resultGrid);
-                return new GridAndInt(amtDelete, resultGrid);
-                //Console.WriteLine("КОНЕЦКОНЕЦКОНЕЦКОНЕЦКОНЕЦКОНЕЦКОНЕЦКОНЕЦКОНЕЦ");
-                //return Ok(new { grid = resultGrid, del = amtDelete}); // Возвращаем результат клиенту в формате JSON
+                Console.WriteLine("КОНЕЦКОНЕЦКОНЕЦКОНЕЦКОНЕЦКОНЕЦКОНЕЦКОНЕЦКОНЕЦ");
+                return Ok(new { grid = resultGrid }); // Возвращаем результат клиенту в формате JSON
             }
 
             else
@@ -505,9 +489,9 @@ namespace RhykerHackarryV1.Controllers // Пространство имён, в 
                 }
             }
 
-            //return Ok(new { grid = resultGrid }); // Возвращаем результат клиенту в формате JSON
+            return Ok(new { grid = resultGrid }); // Возвращаем результат клиенту в формате JSON
         error:
-            //return Ok();
+            return Ok();
                 
             end:
             // Допустим, у тебя где-то определено количество строк и колонок
@@ -534,7 +518,7 @@ namespace RhykerHackarryV1.Controllers // Пространство имён, в 
 
             UpdateResult(curGrid, editGrid, ref resultGrid);
             // Возвращаем JSON
-            //return Ok(new { grid = resultGrid });
+            return Ok(new { grid = resultGrid });
         }
     }
 }

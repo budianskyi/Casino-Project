@@ -8,11 +8,11 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <Content Remove="Pages\Games\Match3\Index.cshtml" />
+	  <Content Remove="Pages\Games\Match 3\index.cshtml" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <None Include="Pages\Games\Match3\Index.cshtml" />
+	  <None Include="Pages\Games\Match 3\index.cshtml" />
 	</ItemGroup>
 
 	<ItemGroup>
