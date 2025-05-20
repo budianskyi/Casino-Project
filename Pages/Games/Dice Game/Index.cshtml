@@ -3,31 +3,30 @@
 @{
 }
 
-<section class="hero-section py-5 text-center" style="background-color: transparent;">
+<section class="hero-section bg-dark text-white py-5 text-center">
     <div class="container">
-        <h1 class="display-4 fw-bold" style="color: #f1c40f;">Ставка на кубики</h1>
-        <p class="lead" style="color: #f1c40f;">Зробіть ставку на результат кидка кубика та виграйте!</p>
-        <i class="fas fa-dice fa-4x mt-3" style="color: #fff;"></i>
+        <h1 class="display-4 fw-bold">🎲 Гра на Кубиках</h1>
+        <p class="lead">Зробіть ставку на результат кидка кубика та виграйте!</p>
+        <i class="fas fa-dice fa-4x text-warning mt-3"></i>
     </div>
 </section>
 
-
 <section class="container my-5">
-    <div class="card shadow-lg border-0 rounded-3" style="background-color: transparent;">
+    <div class="card shadow-lg border-0 rounded-3" style="background-color: #34495e;">
         <div class="card-body">
-            <h2 class="card-title text-center mb-4" style="color: #f1c40f; font-size: 2rem;">Зробіть свою ставку</h2>
+            <h2 class="card-title text-center mb-4 text-warning">Зробіть свою ставку</h2>
             <form method="post">
                 <div class="row g-3">
                     <div class="col-md-4">
-                        <label for="betAmount" class="form-label" style="color: #f1c40f; font-size: 1.2rem;">💰 Сума ставки</label>
+                        <label for="betAmount" class="form-label text-light">💰 Сума ставки</label>
                         <input type="number" class="form-control form-control-lg" id="betAmount" name="BetAmount" min="1" max="1000" placeholder="Введіть ставку" required />
                     </div>
                     <div class="col-md-4">
-                        <label for="playerBet" class="form-label" style="color: #f1c40f; font-size: 1.2rem;">🎯 Ваше число (1-18)</label>
+                        <label for="playerBet" class="form-label text-light">🎯 Ваше число (1-18)</label>
                         <input type="number" class="form-control form-control-lg" id="playerBet" name="PlayerBet" min="1" max="18" placeholder="Виберіть число" required />
                     </div>
                     <div class="col-md-4">
-                        <label for="diceCount" class="form-label" style="color: #f1c40f; font-size: 1.2rem;">🎲 Кількість кубиків</label>
+                        <label for="diceCount" class="form-label text-light">🎲 Кількість кубиків</label>
                         <select class="form-select form-select-lg" id="diceCount" name="NumberOfDice">
                             <option value="1">1 Кубик</option>
                             <option value="2">2 Кубики</option>
@@ -41,14 +40,19 @@
                     </button>
                 </div>
             </form>
+
+            @if (!string.IsNullOrEmpty(Model.Game.ResultMessage))
+            {
+                <div class="alert @(Model.Game.ResultMessage.Contains("виграли") ? "alert-success" : "alert-danger") mt-4 text-center fw-bold fs-5">
+                    @Model.Game.ResultMessage
+                </div>
+            }
         </div>
     </div>
 </section>
 
-
 <div class="position-fixed top-0 end-0 p-3 z-3" style="margin-top: 80px;">
-    <div class="p-3 rounded shadow" style="background-color: transparent; color: #f1c40f;">
+    <div class="bg-dark bg-opacity-75 text-white p-3 rounded shadow">
         <strong>Баланс:</strong> <span id="balance-value">@ViewBag.Balance</span> монет
     </div>
 </div>
-
