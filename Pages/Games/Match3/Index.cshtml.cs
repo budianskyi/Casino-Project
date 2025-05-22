@@ -37,7 +37,7 @@ namespace Casino_Project.Pages.Games.Match3
 
         public void OnGet()
         {
-            MyUser = _context.User.FirstOrDefault();  // ДЛЯ ВАС
+            MyUser = _context.Users.FirstOrDefault();  // ДЛЯ ВАС
             //MyUser = new User(); // НЕ ДЛЯ ВАС (комментриуйте)
 
             if (MyUser != null)
