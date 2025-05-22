@@ -42,7 +42,8 @@ namespace Casino_Project.Pages.Games.Match3
 
             if (MyUser != null)
             {
-                MyUser.Balance = 1265;
+                if (MyUser.Balance <= 0)
+                    MyUser.Balance = 1265;
                 _context.SaveChanges(); // Сохраняем изменения в базу данных
             }
             return;

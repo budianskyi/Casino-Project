@@ -15,6 +15,15 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <Content Remove="wwwroot\images\Color0.png" />
+	  <Content Remove="wwwroot\images\Color1.png" />
+	  <Content Remove="wwwroot\images\Color2.png" />
+	  <Content Remove="wwwroot\images\Color3.png" />
+	  <Content Remove="wwwroot\images\Color4.png" />
+	  <Content Remove="wwwroot\images\Color5.png" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="8.0.0" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.10" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.10">
@@ -30,7 +39,12 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Folder Include="wwwroot\images\" />
+	  <None Include="wwwroot\images\Color0.png" />
+	  <None Include="wwwroot\images\Color1.png" />
+	  <None Include="wwwroot\images\Color2.png" />
+	  <None Include="wwwroot\images\Color3.png" />
+	  <None Include="wwwroot\images\Color4.png" />
+	  <None Include="wwwroot\images\Color5.png" />
 	</ItemGroup>
 
 </Project>

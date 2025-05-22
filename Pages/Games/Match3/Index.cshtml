@@ -36,9 +36,12 @@
         .cell {
             width: 120px;
             height: 120px;
-            border: 2px solid white;
             border-radius: 8px;
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
         }
+
 
         .controls {
             display: flex;
@@ -210,6 +213,15 @@
             { color: '#4444FF' }, { color: '#FFFF44' }, { color: '#44FFFF' }
         ];
 
+        const images = [
+            '/images/Color5.png',
+            '/images/Color1.png',
+            '/images/Color2.png',
+            '/images/Color3.png',
+            '/images/Color4.png'
+        ];
+
+
         let fallingFlags = []; // массив булевых флагов, показывает какие клетки анимируются
         let currentGrid = [];
         let balance = @Model.MyUser.Balance;
@@ -266,6 +278,7 @@
                     betValue = 0;
                 }
 
+                balance = @Model.MyUser.Balance;
                 if (balance <= 0) {
                     betValue = 0;
                 } else if (betValue > balance) {
@@ -292,7 +305,7 @@
                     const err = await response.json();
                     console.error('Ошибка:', err.error, 'Код:', response.status);
                     return;
-                }       
+                }
 
                 const result = await response.json();
 
@@ -356,7 +369,8 @@
                     const cell = document.createElement('div');
                     cell.className = 'cell';
                     cell.dataset.key = key;
-                    cell.style.backgroundColor = colors[index]?.color || '#444';
+                    cell.style.backgroundImage = `url('${images[index]}')`;
+                    //cell.style.backgroundColor = colors[index]?.color || '#444';
 
                     if (isNew && fallingFlags[col][row]) {
                         const temp = deletedCounts[col] || 0;
