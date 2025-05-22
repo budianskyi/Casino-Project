@@ -37,8 +37,8 @@ namespace Casino_Project.Pages.Games.Match3
 
         public void OnGet()
         {
-            MyUser = _context.User.FirstOrDefault();  // ДЛЯ ВАС
-            //MyUser = new User(); // НЕ ДЛЯ ВАС (комментриуйте)
+            //MyUser = _context.User.FirstOrDefault();  // ДЛЯ ВАС
+            MyUser = new User(); // НЕ ДЛЯ ВАС (комментриуйте)
 
             if (MyUser != null)
             {
@@ -55,9 +55,9 @@ namespace Casino_Project.Pages.Games.Match3
                 if (MyUser == null)
                 {
                     Console.WriteLine("УСЕР НУЛЛ! _");
-                    MyUser = _context.User.FirstOrDefault();  // ДЛЯ ВАС!
-                    //MyUser = new User(); // инициализируешь здесь
-                    //MyUser.Balance = 1265;  // тестговна
+                    //MyUser = _context.User.FirstOrDefault();  // ДЛЯ ВАС!
+                    MyUser = new User(); // инициализируешь здесь
+                    MyUser.Balance = 1265;  // тестговна
                 }
 
                 Console.WriteLine("Начальный баланс: " + MyUser.Balance);
